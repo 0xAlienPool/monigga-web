@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>$MONIGGA Tools — Monad Utilities</title>
+  <meta name="description" content="$MONIGGA Tools — Monad token utilities for holders & builders. Snapshots, whale analysis, and more.">
+
+  <meta property="og:title" content="$MONIGGA Tools — Monad Utilities">
+  <meta property="og:description" content="Monad token utilities for holders & builders. Snapshots, whale analysis, and more.">
+  <meta property="og:image" content="images/og-image.jpg">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+
+  <style>
+  @font-face {
+    font-family: 'Roboto Mono';
+    font-style: normal;
+    font-weight: 500 800;
+    font-display: swap;
+    src: url(fonts/RobotoMono.ttf) format('ttf');
+  }
+    :root {
+      --bg-color: #ffffff;
+      --text-main: #1a1a1a;
+      --text-muted: #666666;
+      --text-dim: #aaaaaa;
+      --accent: #7B3FE4;
+      --accent-hover: #6930c3;
+      --accent-glow: rgba(123, 63, 228, 0.25);
+      --surface: rgba(245, 243, 255, 0.8);
+      --surface-border: rgba(123, 63, 228, 0.15);
+      --input-bg: #ffffff;
+      --success: #22c55e;
+      --error: #ef4444;
+      --gold: #fbbf24;
+      --diamond: #60a5fa;
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #050508;
+      --text-main: #ffffff;
+      --text-muted: #a0a0b0;
+      --text-dim: #555566;
+      --accent: #9B5FFF;
+      --accent-hover: #b080ff;
+      --accent-glow: rgba(155, 95, 255, 0.3);
+      --surface: rgba(20, 15, 30, 0.5);
+      --surface-border: rgba(255, 255, 255, 0.08);
+      --input-bg: rgba(0, 0, 0, 0.4);
+      --success: #00E676;
+      --error: #FF3D00;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: radial-gradient(ellipse at 50% 0%, var(--accent-glow) 0%, transparent 60%), var(--bg-color);
+      color: var(--text-main);
+      font-family: 'Roboto Mono', sans-serif;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-in { opacity: 0; animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+    /* ── Top Bar ── */
+    .top-nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      background: var(--surface); border-bottom: 1px solid var(--surface-border);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      padding: 0 24px; height: 60px; display: flex; align-items: center; gap: 16px; z-index: 100;
+    }
+
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 8px; color: var(--text-main);
+      text-decoration: none; font-weight: 700; font-size: 14px;
+      padding: 8px 16px; border-radius: 999px; background: rgba(255,255,255,0.05);
+      border: 1px solid var(--surface-border); transition: all 0.3s ease;
+    }
+    .back-btn:hover { background: var(--accent-glow); color: var(--accent); border-color: var(--accent); transform: translateX(-2px); }
+
+    .nav-title { font-weight: 800; font-size: 16px; color: var(--accent); flex: 1; text-align: center; letter-spacing: 1px; text-transform: uppercase; }
+
+    .theme-toggle {
+      width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--surface-border); background: rgba(255,255,255,0.05);
+      cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; color: var(--text-main);
+    }
+    .theme-toggle:hover { border-color: var(--accent); background: var(--accent); color: #fff; transform: rotate(15deg); }
+
+    /* ── Main Layout ── */
+    .wrapper { max-width: 1000px; margin: 0 auto; padding: 100px 20px 60px; position: relative; z-index: 10; }
+
+    .page-header { text-align: center; margin-bottom: 50px; }
+    .page-header h1 {
+      font-size: 3.5rem; font-weight: 800; letter-spacing: -1px; line-height: 1.1; margin-bottom: 15px;
+      background: linear-gradient(135deg, var(--text-main), var(--text-dim)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .page-header h1 span { background: linear-gradient(135deg, var(--accent), #FF5E94); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .page-header p { font-size: 1.15rem; color: var(--text-muted); font-weight: 500; }
+
+    /* ── API Key Panel ── */
+    .api-panel {
+      background: linear-gradient(135deg, rgba(155,95,255,0.1), transparent);
+      border: 1px solid var(--accent); border-radius: 20px; padding: 24px; margin-bottom: 40px;
+      backdrop-filter: blur(20px); box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+    .api-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .api-panel h3 { font-size: 1.2rem; font-weight: 800; color: var(--accent); display: flex; align-items: center; gap: 10px; }
+
+    .api-status { padding: 6px 14px; border-radius: 999px; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+    .api-status.connected { background: rgba(0,230,118,0.15); color: var(--success); border: 1px solid rgba(0,230,118,0.3); }
+    .api-status.disconnected { background: rgba(255,61,0,0.15); color: var(--error); border: 1px solid rgba(255,61,0,0.3); }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; animation: pulseDot 2s infinite; }
+    @keyframes pulseDot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    /* ── Forms & Inputs ── */
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+
+    .input-field {
+      width: 100%; padding: 16px 20px; border-radius: 14px; border: 1px solid var(--surface-border);
+      background: var(--input-bg); color: var(--text-main); font-family: 'Space Mono', monospace; font-size: 15px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .input-field:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-glow), inset 0 2px 4px rgba(0,0,0,0.1); }
+    .input-field::placeholder { color: var(--text-dim); }
+
+    .input-row { display: flex; gap: 20px; }
+    .input-row .form-group { flex: 1; }
+    .input-row .form-group.small { flex: 0 0 140px; }
+
+    /* ── Tool Cards (Accordions) ── */
+    .tool-card {
+      background: var(--surface); border: 1px solid var(--surface-border); border-radius: 24px;
+      margin-bottom: 24px; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.2); overflow: hidden; transition: all 0.4s ease;
+    }
+    .tool-card:hover { border-color: rgba(255,255,255,0.15); box-shadow: 0 20px 50px rgba(0,0,0,0.3); }
+
+    .tool-header {
+      display: flex; align-items: center; gap: 20px; padding: 24px 30px; cursor: pointer; user-select: none;
+      background: rgba(255,255,255,0.02); transition: background 0.3s;
+    }
+    .tool-header:hover { background: rgba(255,255,255,0.05); }
+
+    .tool-icon {
+      width: 56px; height: 56px; border-radius: 16px; font-size: 26px;
+      background: linear-gradient(135deg, var(--accent-glow), transparent);
+      border: 1px solid var(--accent); display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 8px 20px var(--accent-glow);
+    }
+
+    .tool-title { flex: 1; }
+    .tool-title h2 { font-size: 1.5rem; font-weight: 800; color: var(--text-main); margin-bottom: 4px; }
+    .tool-title p { color: var(--text-muted); font-size: 0.95rem; font-weight: 500; }
+
+    .toggle-icon { font-size: 1.2rem; color: var(--text-muted); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    .tool-card.collapsed .toggle-icon { transform: rotate(-90deg); }
+
+    .tool-content { padding: 0 30px 30px; display: block; animation: expand 0.4s ease-out forwards; border-top: 1px solid var(--surface-border); margin-top: 5px; padding-top: 25px;}
+    .tool-card.collapsed .tool-content { display: none; }
+
+    @keyframes expand { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── Buttons ── */
+    .btn-group { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+
+    .btn {
+      background: linear-gradient(135deg, var(--accent), var(--accent-hover)); color: #fff;
+      border: none; padding: 14px 28px; border-radius: 14px; font-family: 'Roboto Mono', sans-serif;
+      font-weight: 800; font-size: 15px; letter-spacing: 0.5px; cursor: pointer; transition: all 0.3s ease;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 8px 20px var(--accent-glow);
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(155, 95, 255, 0.5); }
+    .btn:active { transform: translateY(1px); }
+
+    .btn.secondary { background: rgba(255,255,255,0.05); color: var(--text-main); border: 1px solid var(--surface-border); box-shadow: none; }
+    .btn.secondary:hover { background: rgba(255,255,255,0.1); border-color: var(--accent); color: #fff; }
+
+    /* ── Status & Notifications ── */
+    .status { padding: 14px 20px; border-radius: 12px; font-weight: 600; font-size: 0.95rem; display: none; animation: fadeInUp 0.3s ease; margin-bottom: 20px; }
+    .status.active { display: block; }
+    .status.loading { background: var(--accent-glow); color: #fff; border: 1px solid var(--accent); }
+    .status.success { background: rgba(0, 230, 118, 0.15); color: var(--success); border: 1px solid rgba(0, 230, 118, 0.3); }
+    .status.error { background: rgba(255, 61, 0, 0.15); color: var(--error); border: 1px solid rgba(255, 61, 0, 0.3); }
+
+    /* ── Results Tables & Cards ── */
+    .results-area { display: none; background: var(--surface); border-radius: 16px; border: 1px solid var(--surface-border); padding: 20px; margin-top: 10px; animation: fadeInUp 0.4s ease; }
+    .results-area.active { display: block; }
+
+    .results-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--surface-border); }
+    .results-header h3 { font-size: 1.4rem; font-weight: 800; color: #fff; }
+    .results-stats { font-size: 0.9rem; color: var(--text-muted); font-weight: 600; display: flex; gap: 15px; }
+
+    .results-container { max-height: 400px; overflow-y: auto; border-radius: 8px; }
+    .results-container::-webkit-scrollbar { width: 6px; }
+    .results-container::-webkit-scrollbar-thumb { background: var(--surface-border); border-radius: 10px; }
+
+    .results-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .results-table th { background: rgba(255,255,255,0.02); color: var(--text-muted); font-weight: 700; text-transform: uppercase; padding: 12px 15px; text-align: left; position: sticky; top: 0; z-index: 2; border-bottom: 1px solid var(--surface-border); }
+    .results-table td { padding: 14px 15px; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text-main); }
+    .results-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .results-table .address { font-family: 'Space Mono', monospace; color: var(--accent); }
+    .results-table .amount { font-weight: 700; font-family: 'Space Mono', monospace; }
+    .results-table .percentage { color: var(--text-muted); font-family: 'Space Mono', monospace; }
+
+    /* Generic Data Cards (Wallet / Whales) */
+    .data-card {
+      background: rgba(255,255,255,0.02); border: 1px solid var(--surface-border); border-radius: 16px;
+      padding: 16px 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .data-card:hover { border-color: rgba(255,255,255,0.1); transform: translateX(4px); }
+    .data-info { display: flex; flex-direction: column; gap: 4px; }
+    .data-title { font-weight: 700; font-size: 1.1rem; color: #fff; }
+    .data-sub { font-family: 'Space Mono', monospace; font-size: 0.85rem; color: var(--text-muted); }
+    .data-values { text-align: right; }
+    .data-amount { font-weight: 800; font-size: 1.1rem; font-family: 'Space Mono', monospace; }
+    .data-usd { font-size: 0.9rem; color: var(--success); font-weight: 600; }
+
+    /* Diamond Hands Specifics */
+    .diamond-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 25px; }
+    .diamond-stat { background: rgba(0,0,0,0.3); border: 1px solid var(--surface-border); border-radius: 16px; padding: 20px; text-align: center; }
+    .diamond-stat.highlight { background: rgba(155,95,255,0.1); border-color: var(--accent); box-shadow: inset 0 0 20px var(--accent-glow); }
+    .diamond-stat .stat-icon { font-size: 2rem; margin-bottom: 10px; }
+    .diamond-stat .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
+    .diamond-stat .stat-value { font-size: 1.8rem; font-weight: 800; margin-top: 5px; }
+    .diamond-stat .diamond { color: var(--diamond); text-shadow: 0 0 10px rgba(96, 165, 250, 0.4); }
+    .diamond-stat .gold { color: var(--gold); text-shadow: 0 0 10px rgba(251, 191, 36, 0.4); }
+
+    .tier-badge { padding: 4px 12px; border-radius: 999px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+    .tier-badge.og { background: rgba(251, 191, 36, 0.15); color: var(--gold); border: 1px solid rgba(251, 191, 36, 0.3); }
+    .tier-badge.diamond { background: rgba(96, 165, 250, 0.15); color: var(--diamond); border: 1px solid rgba(96, 165, 250, 0.3); }
+    .tier-badge.accumulator { background: rgba(34, 197, 94, 0.15); color: var(--success); border: 1px solid rgba(34, 197, 94, 0.3); }
+    .tier-badge.steady { background: rgba(255, 255, 255, 0.1); color: #ccc; border: 1px solid rgba(255, 255, 255, 0.2); }
+    .tier-badge.paper { background: rgba(239, 68, 68, 0.15); color: var(--error); border: 1px solid rgba(239, 68, 68, 0.3); }
+
+    .score-box { text-align: center; }
+    .score-value { font-size: 1.6rem; font-weight: 800; color: var(--diamond); }
+    .score-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+    /* Particles Background */
+    #particleGrid { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0.5; }
+
+    @media (max-width: 768px) {
+      .page-header h1 { font-size: 2.5rem; }
+      .tool-header { padding: 20px; flex-wrap: wrap; }
+      .input-row { flex-direction: column; gap: 10px; }
+      .input-row .form-group.small { flex: 1; }
+      .btn { width: 100%; }
+      .data-card { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .data-values { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="particleGrid"></canvas>
+
+  <nav class="top-nav animate-in">
+    <a href="index.html" class="back-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      Home
+    </a>
+    <div class="nav-title">$MONIGGA TOOLS</div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle Theme">🌓</button>
+  </nav>
+
+  <div class="wrapper">
+
+    <div class="page-header animate-in" style="animation-delay: 0.1s;">
+      <h1>Monad <span>Tools</span></h1>
+      <p>Elite on-chain utilities for holders, traders, and builders.</p>
+    </div>
+
+    <div class="api-panel animate-in" style="animation-delay: 0.15s;">
+      <div class="api-panel-header">
+        <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> BlockVision API Configuration</h3>
+        <span class="api-status disconnected" id="apiStatus"><span class="status-dot"></span> Not Set</span>
+      </div>
+      <div class="form-group" style="margin-bottom: 10px;">
+        <input type="password" class="input-field" id="globalApiKey" placeholder="Enter your private API key...">
+      </div>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">Your key is stored locally in your browser. Get a free API key at <a href="https://dashboard.blockvision.org/overview" target="_blank" style="color: var(--accent); text-decoration: none; font-weight: 700;">BlockVision Dashboard</a>.</p>
+    </div>
+
+    <div class="tool-card animate-in" id="tool-snapshot" style="animation-delay: 0.2s;">
+      <div class="tool-header" onclick="toggleTool('tool-snapshot')">
+        <div class="tool-icon">📸</div>
+        <div class="tool-title">
+          <h2>Token Holder Snapshot</h2>
+          <p>Extract top holders of any Monad token instantly.</p>
+        </div>
+        <span class="toggle-icon">▼</span>
+      </div>
+
+      <div class="tool-content">
+        <div class="input-row">
+          <div class="form-group">
+            <label>Token Contract Address</label>
+            <input type="text" class="input-field" id="snapshotTokenAddress" placeholder="0x..." value="0x81A224F8A62f52BdE942dBF23A56df77A10b7777">
+          </div>
+          <div class="form-group small">
+            <label>Top Holders</label>
+            <input type="number" class="input-field" id="snapshotTopCount" value="50" min="1" max="500">
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn" onclick="fetchHolders()">Run Snapshot</button>
+          <button class="btn secondary" id="exportCsvBtn" onclick="exportSnapshotCSV()" style="display: none;">CSV</button>
+          <button class="btn secondary" id="exportJsonBtn" onclick="exportSnapshotJSON()" style="display: none;">JSON</button>
+          <button class="btn secondary" id="copyAddressesBtn" onclick="copySnapshotAddresses()" style="display: none;">Copy All</button>
+        </div>
+
+        <div class="status" id="snapshotStatus"></div>
+
+        <div class="results-area" id="snapshotResults">
+          <div class="results-header">
+            <h3 id="snapshotTokenName">Token Holders</h3>
+            <div class="results-stats">
+              <span id="snapshotTotalHolders">0 holders</span>
+              <span id="snapshotTime"></span>
+            </div>
+          </div>
+          <div class="results-container">
+            <table class="results-table">
+              <thead>
+                <tr><th>#</th><th>Address</th><th class="amount">Amount</th><th class="percentage">%</th></tr>
+              </thead>
+              <tbody id="snapshotTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tool-card collapsed animate-in" id="tool-wallet" style="animation-delay: 0.25s;">
+      <div class="tool-header" onclick="toggleTool('tool-wallet')">
+        <div class="tool-icon">👛</div>
+        <div class="tool-title">
+          <h2>Wallet X-Ray</h2>
+          <p>Scan all tokens & NFTs held by a specific wallet.</p>
+        </div>
+        <span class="toggle-icon">▼</span>
+      </div>
+
+      <div class="tool-content">
+        <div class="form-group">
+          <label>Target Wallet Address</label>
+          <input type="text" class="input-field" id="walletAddress" placeholder="0x...">
+        </div>
+
+        <div class="btn-group">
+          <button class="btn" onclick="checkWallet()">Scan Wallet</button>
+          <button class="btn secondary" id="exportWalletCsvBtn" onclick="exportWalletCSV()" style="display: none;">Export CSV</button>
+        </div>
+
+        <div class="status" id="walletStatus"></div>
+
+        <div class="results-area" id="walletResults">
+          <div class="results-header">
+            <h3>Token Holdings</h3>
+            <div class="results-stats">
+              <span id="walletTotalTokens">0 tokens</span>
+              <span id="walletTotalValue" style="color: var(--success); font-weight: 800;"></span>
+            </div>
+          </div>
+          <div id="walletTokenList"></div>
+
+          <div class="results-header" id="walletNftHeader" style="margin-top: 30px; border-top: 1px solid var(--surface-border); padding-top: 20px; display: none;">
+            <h3>NFT Holdings</h3>
+            <div class="results-stats"><span id="walletTotalNfts">0 NFTs</span></div>
+          </div>
+          <div id="walletNftList"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tool-card collapsed animate-in" id="tool-whale" style="animation-delay: 0.3s;">
+      <div class="tool-header" onclick="toggleTool('tool-whale')">
+        <div class="tool-icon">🐋</div>
+        <div class="tool-title">
+          <h2>Whale Watcher</h2>
+          <p>Discover intersectional holdings among top token whales.</p>
+        </div>
+        <span class="toggle-icon">▼</span>
+      </div>
+
+      <div class="tool-content">
+        <div class="input-row">
+          <div class="form-group">
+            <label>Token Contract Address</label>
+            <input type="text" class="input-field" id="whaleTokenAddress" placeholder="0x..." value="0x81A224F8A62f52BdE942dBF23A56df77A10b7777">
+          </div>
+          <div class="form-group small">
+            <label>Top Whales</label>
+            <input type="number" class="input-field" id="whaleCount" value="10" min="1" max="50">
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn" onclick="watchWhales()">Analyze Whales</button>
+          <button class="btn secondary" id="exportWhaleCsvBtn" onclick="exportWhaleCSV()" style="display: none;">CSV</button>
+        </div>
+
+        <div class="status" id="whaleStatus"></div>
+
+        <div class="results-area" id="whaleResults">
+          <div class="results-header"><h3>Whale Radar</h3></div>
+          <div id="whaleList"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tool-card collapsed animate-in" id="tool-diamond" style="animation-delay: 0.35s;">
+      <div class="tool-header" onclick="toggleTool('tool-diamond')">
+        <div class="tool-icon">💎</div>
+        <div class="tool-title">
+          <h2>Diamond Hand Analyzer</h2>
+          <p>Rank top holders by loyalty, focus, and holding duration.</p>
+        </div>
+        <span class="toggle-icon">▼</span>
+      </div>
+
+      <div class="tool-content">
+        <div class="input-row">
+          <div class="form-group">
+            <label>Token Contract Address</label>
+            <input type="text" class="input-field" id="diamondTokenAddress" placeholder="0x..." value="0x81A224F8A62f52BdE942dBF23A56df77A10b7777">
+          </div>
+          <div class="form-group small">
+            <label>Analyze Top</label>
+            <input type="number" class="input-field" id="diamondCount" value="25" min="5" max="50">
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn" onclick="analyzeDiamondHands()">Run Analysis</button>
+          <button class="btn secondary" id="exportDiamondCsvBtn" onclick="exportDiamondCSV()" style="display: none;">CSV</button>
+        </div>
+
+        <div class="status" id="diamondStatus"></div>
+
+        <div class="results-area" id="diamondResults">
+          <div class="diamond-summary" id="diamondSummary"></div>
+          <div class="results-header"><h3 id="diamondTokenName">Holder Rankings</h3></div>
+          <div id="diamondList"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tool-card collapsed animate-in" id="tool-nft" style="animation-delay: 0.4s;">
+      <div class="tool-header" onclick="toggleTool('tool-nft')">
+        <div class="tool-icon">🖼️</div>
+        <div class="tool-title">
+          <h2>NFT Snapshot</h2>
+          <p>Extract wallet addresses for any Monad NFT collection.</p>
+        </div>
+        <span class="toggle-icon">▼</span>
+      </div>
+
+      <div class="tool-content">
+        <div class="input-row">
+          <div class="form-group">
+            <label>NFT Contract Address</label>
+            <input type="text" class="input-field" id="nftAddress" placeholder="0x...">
+          </div>
+          <div class="form-group small">
+            <label>Fetch Limit</label>
+            <input type="number" class="input-field" id="nftTopCount" value="50" min="1" max="500">
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn" onclick="fetchNFTHolders()">Snapshot Collection</button>
+          <button class="btn secondary" id="exportNftCsvBtn" onclick="exportNFTCSV()" style="display: none;">CSV</button>
+          <button class="btn secondary" id="copyNftAddressesBtn" onclick="copyNFTAddresses()" style="display: none;">Copy All</button>
+        </div>
+
+        <div class="status" id="nftStatus"></div>
+
+        <div class="results-area" id="nftResults">
+          <div class="results-header">
+            <h3 id="nftCollectionTitle">NFT Holders</h3>
+            <div class="results-stats">
+              <span id="nftTotalHolders">0 holders</span>
+              <span id="nftTotalSupply"></span>
+            </div>
+          </div>
+          <div class="results-container">
+            <table class="results-table">
+              <thead><tr><th>#</th><th>Address</th><th class="amount">Held</th><th class="percentage">%</th></tr></thead>
+              <tbody id="nftTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // --- Theme Toggle ---
+    const themeToggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+    themeToggle.addEventListener('click', () => {
+      html.classList.add('theme-transition');
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      setTimeout(() => html.classList.remove('theme-transition'), 350);
+    });
+
+    // --- API Key Mgmt ---
+    const apiKeyInput = document.getElementById('globalApiKey');
+    const apiStatus = document.getElementById('apiStatus');
+    const savedApiKey = localStorage.getItem('blockvision_api_key');
+    if (savedApiKey) { apiKeyInput.value = savedApiKey; updateApiStatus(true); }
+
+    apiKeyInput.addEventListener('input', () => {
+      const key = apiKeyInput.value.trim();
+      if (key) { localStorage.setItem('blockvision_api_key', key); updateApiStatus(true); }
+      else { localStorage.removeItem('blockvision_api_key'); updateApiStatus(false); }
+    });
+
+    function updateApiStatus(connected) {
+      if (connected) { apiStatus.className = 'api-status connected'; apiStatus.innerHTML = '<span class="status-dot"></span> Authenticated'; }
+      else { apiStatus.className = 'api-status disconnected'; apiStatus.innerHTML = '<span class="status-dot"></span> Missing Key'; }
+    }
+    function getApiKey() { return apiKeyInput.value.trim(); }
+
+    // --- Tool Toggle ---
+    function toggleTool(id) { document.getElementById(id).classList.toggle('collapsed'); }
+
+    // --- Helpers ---
+    function esc(str) { const d = document.createElement('div'); d.textContent = String(str); return d.innerHTML; }
+    function showStatus(id, msg, type) { const el = document.getElementById(id); el.textContent = msg; el.className = `status active ${type}`; }
+    function downloadFile(content, filename, type) {
+      const blob = new Blob([content], { type }); const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    }
+    function validateAddress(a) { return a && a.startsWith('0x') && a.length === 42; }
+    function formatNumber(num) { return parseFloat(num || 0).toLocaleString(undefined, {maximumFractionDigits: 2}); }
+    function formatUSD(num) { return '$' + parseFloat(num || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
+
+    // --- API Core ---
+    const apiCache = {};
+    async function apiCall(endpoint, params = {}) {
+      const apiKey = getApiKey();
+      if (!apiKey) throw new Error('API Key required. Enter it at the top of the page.');
+      const url = new URL(`https://api.blockvision.org/v2/monad/${endpoint}`);
+      Object.keys(params).forEach(key => { if (params[key]) url.searchParams.append(key, params[key]); });
+      const cacheKey = url.toString();
+      if (apiCache[cacheKey] && Date.now() - apiCache[cacheKey].time < 300000) return apiCache[cacheKey].data;
+      const res = await fetch(url, { headers: { 'X-API-Key': apiKey, 'Accept': 'application/json' } });
+      if (!res.ok) throw new Error(res.status === 401 ? 'Invalid API Key' : res.status === 429 ? 'Rate limit exceeded' : `API Error ${res.status}`);
+      const data = await res.json();
+      if (data.code !== 0) throw new Error(data.reason || 'API error');
+      apiCache[cacheKey] = { data: data.result, time: Date.now() };
+      return data.result;
+    }
+
+    // --- Tool 1: Snapshot ---
+    let snapshotData = [];
+    async function fetchHolders() {
+      const addr = document.getElementById('snapshotTokenAddress').value.trim();
+      const count = parseInt(document.getElementById('snapshotTopCount').value) || 50;
+      if (!validateAddress(addr)) return showStatus('snapshotStatus', 'Invalid Address', 'error');
+      showStatus('snapshotStatus', 'Extracting blockchain data...', 'loading');
+      snapshotData = []; let cursor = '', page = 1, sym = '';
+      try {
+        const info = await apiCall('contract/detail', { contractAddress: addr });
+        sym = info?.token?.symbol || '';
+        while (snapshotData.length < count) {
+          const res = await apiCall('token/holders', { contractAddress: addr, limit: Math.min(50, count - snapshotData.length), cursor });
+          if (!res.data || !res.data.length) break;
+          snapshotData.push(...res.data);
+          showStatus('snapshotStatus', `Syncing page ${page}...`, 'loading');
+          cursor = res.nextPageCursor; if (!cursor) break; page++;
+        }
+        snapshotData = snapshotData.slice(0, count);
+        if(!snapshotData.length) return showStatus('snapshotStatus', 'No holders found.', 'error');
+
+        document.getElementById('snapshotTable').innerHTML = snapshotData.map((h, i) => `
+          <tr><td>${i+1}</td><td class="address">${esc(h.holder)}</td><td class="amount">${formatNumber(h.amount)}</td><td class="percentage">${parseFloat(h.percentage||0).toFixed(2)}%</td></tr>
+        `).join('');
+        document.getElementById('snapshotResults').classList.add('active');
+        document.getElementById('snapshotTokenName').innerHTML = sym ? `Top $${esc(sym)} Holders` : 'Holder Snapshot';
+        document.getElementById('snapshotTotalHolders').textContent = `${snapshotData.length} records`;
+        ['exportCsvBtn','exportJsonBtn','copyAddressesBtn'].forEach(id => document.getElementById(id).style.display = 'inline-flex');
+        showStatus('snapshotStatus', `Successfully mapped ${snapshotData.length} wallets.`, 'success');
+      } catch (e) { showStatus('snapshotStatus', e.message, 'error'); }
+    }
+    function exportSnapshotCSV() {
+      if(!snapshotData.length) return;
+      let csv = 'Rank,Address,Amount,Percentage\n' + snapshotData.map((h,i) => `${i+1},${h.holder},${h.amount},${h.percentage}`).join('\n');
+      downloadFile(csv, 'snapshot.csv', 'text/csv');
+    }
+    function exportSnapshotJSON() {
+      if(!snapshotData.length) return;
+      downloadFile(JSON.stringify(snapshotData, null, 2), 'snapshot.json', 'application/json');
+    }
+    function copySnapshotAddresses() {
+      if(!snapshotData.length) return;
+      navigator.clipboard.writeText(snapshotData.map(h=>h.holder).join('\n')).then(()=>showStatus('snapshotStatus','Copied!','success'));
+    }
+
+    // --- Tool 2: Wallet Checker ---
+    let walletTokenData=[], walletNftData=[];
+    async function checkWallet() {
+      const addr = document.getElementById('walletAddress').value.trim();
+      if (!validateAddress(addr)) return showStatus('walletStatus', 'Invalid Address', 'error');
+      showStatus('walletStatus', 'Scanning wallet layers...', 'loading');
+      try {
+        const res = await apiCall('account/tokens', { address: addr });
+        walletTokenData = res.data || []; let totalV = 0;
+        document.getElementById('walletTokenList').innerHTML = walletTokenData.length ? walletTokenData.map(t => {
+          const v = parseFloat(t.usdValue||0); totalV += v;
+          return `<div class="data-card"><div class="data-info"><span class="data-title">${esc(t.symbol||'???')}</span><span class="data-sub">${esc(t.contractAddress)}</span></div><div class="data-values"><div class="data-amount">${formatNumber(t.balance)}</div>${v>0?`<div class="data-usd">${formatUSD(v)}</div>`:''}</div></div>`;
+        }).join('') : '<p style="color:var(--text-muted)">No tokens found.</p>';
+        document.getElementById('walletTotalTokens').textContent = `${walletTokenData.length} Tokens`;
+        document.getElementById('walletTotalValue').textContent = totalV > 0 ? formatUSD(totalV) : '';
+
+        showStatus('walletStatus', 'Scanning NFT layers...', 'loading');
+        try {
+          const nres = await apiCall('account/nfts', { address: addr });
+          walletNftData = nres.data || [];
+          if(walletNftData.length) {
+            document.getElementById('walletNftHeader').style.display = 'flex';
+            document.getElementById('walletTotalNfts').textContent = `${walletNftData.length} NFTs`;
+            document.getElementById('walletNftList').innerHTML = walletNftData.map(n => `<div class="data-card"><div class="data-info"><span class="data-title">🖼️ ${esc(n.collectionName||n.name||'NFT')}</span><span class="data-sub">${esc(n.contractAddress)}</span></div><div class="data-values"><div class="data-amount">${n.tokenId?`#${esc(n.tokenId)}`:`${n.amount||1}x`}</div></div></div>`).join('');
+          }
+        } catch(e) {}
+
+        document.getElementById('walletResults').classList.add('active');
+        document.getElementById('exportWalletCsvBtn').style.display = 'inline-flex';
+        showStatus('walletStatus', `Scan complete. Found ${walletTokenData.length} assets.`, 'success');
+      } catch(e) { showStatus('walletStatus', e.message, 'error'); }
+    }
+    function exportWalletCSV() {
+      let csv = 'Type,Name,Contract,Amount,Value\n';
+      walletTokenData.forEach(t => csv+=`Token,${t.symbol},${t.contractAddress},${t.balance},${t.usdValue||0}\n`);
+      walletNftData.forEach(n => csv+=`NFT,${n.collectionName||n.name},${n.contractAddress},${n.amount||1},\n`);
+      downloadFile(csv, 'wallet_scan.csv', 'text/csv');
+    }
+
+    // --- Tool 3: Whale Watcher ---
+    let whaleData=[];
+    async function watchWhales() {
+      const addr = document.getElementById('whaleTokenAddress').value.trim();
+      const count = parseInt(document.getElementById('whaleCount').value) || 10;
+      if (!validateAddress(addr)) return showStatus('whaleStatus', 'Invalid Address', 'error');
+      showStatus('whaleStatus', 'Locating Apex predators...', 'loading');
+      try {
+        const hRes = await apiCall('token/holders', { contractAddress: addr, limit: count });
+        const holders = hRes.data || []; if(!holders.length) return showStatus('whaleStatus', 'No whales found', 'error');
+        whaleData = []; const counts = {};
+        for(let i=0; i<holders.length; i++) {
+          showStatus('whaleStatus', `Deep scanning Whale ${i+1}/${holders.length}...`, 'loading');
+          if(i>0) await new Promise(r=>setTimeout(r,300));
+          try {
+            const tRes = await apiCall('account/tokens', { address: holders[i].holder });
+            const others = (tRes.data||[]).filter(t=>t.contractAddress.toLowerCase()!==addr.toLowerCase()).slice(0,5);
+            others.forEach(t => { const k = t.contractAddress; if(!counts[k]) counts[k]={sym:t.symbol, c:0}; counts[k].c++; });
+            whaleData.push({...holders[i], others});
+          } catch(e) { whaleData.push({...holders[i], others:[]}); }
+        }
+
+        let html = '';
+        const common = Object.values(counts).filter(t=>t.c>=2).sort((a,b)=>b.c-a.c).slice(0,4);
+        if(common.length) {
+          html += `<div class="data-card" style="background:rgba(155,95,255,0.1); border-color:var(--accent)"><div class="data-info"><span class="data-title">🔥 Smart Money Convergence</span><span class="data-sub" style="color:#fff; margin-top:5px;">${common.map(t=>`<strong>${t.sym}</strong> (${t.c} whales)`).join(' &bull; ')}</span></div></div>`;
+        }
+        html += whaleData.map((w,i) => `<div class="data-card"><div class="data-info"><span class="data-title">#${i+1} &nbsp;<span style="font-family:monospace;font-size:0.9rem;font-weight:normal;color:var(--accent)">${esc(w.holder)}</span></span><span class="data-sub">Also holds: ${w.others.length?w.others.map(t=>t.symbol).join(', '):'None'}</span></div><div class="data-values"><div class="data-amount">${formatNumber(w.amount)}</div><div class="data-usd">${parseFloat(w.percentage).toFixed(2)}%</div></div></div>`).join('');
+
+        document.getElementById('whaleList').innerHTML = html;
+        document.getElementById('whaleResults').classList.add('active');
+        document.getElementById('exportWhaleCsvBtn').style.display = 'inline-flex';
+        showStatus('whaleStatus', 'Whale mapping complete.', 'success');
+      } catch(e) { showStatus('whaleStatus', e.message, 'error'); }
+    }
+    function exportWhaleCSV() {
+      let csv = 'Rank,Address,Amount,Percentage,Other Holdings\n' + whaleData.map((w,i) => `${i+1},${w.holder},${w.amount},${w.percentage},"${w.others.map(t=>t.symbol).join('; ')}"`).join('\n');
+      downloadFile(csv, 'whales.csv', 'text/csv');
+    }
+
+    // --- Tool 4: Diamond Hand ---
+    let diamondData=[];
+    async function analyzeDiamondHands() {
+      const addr = document.getElementById('diamondTokenAddress').value.trim();
+      const count = parseInt(document.getElementById('diamondCount').value) || 25;
+      if (!validateAddress(addr)) return showStatus('diamondStatus', 'Invalid Address', 'error');
+      showStatus('diamondStatus', 'Evaluating holder psychology...', 'loading');
+      try {
+        const hRes = await apiCall('token/holders', { contractAddress: addr, limit: count });
+        const holders = hRes.data || []; if(!holders.length) return showStatus('diamondStatus', 'No holders found', 'error');
+
+        diamondData = []; let dStr = 0, ogs = 0, diams = 0;
+        for(let i=0; i<holders.length; i++) {
+          showStatus('diamondStatus', `Processing Entity ${i+1}/${holders.length}...`, 'loading');
+          if(i>0) await new Promise(r=>setTimeout(r,250));
+          const pct = parseFloat(holders[i].percentage||0);
+          let fScore = 50, oCount = 0;
+          try {
+            const tRes = await apiCall('account/tokens', { address: holders[i].holder });
+            oCount = (tRes.data||[]).length; fScore = Math.max(0, 100 - oCount*5);
+          } catch(e) {}
+
+          const posS = Math.min(100, pct*10), rnkS = Math.max(0, 100-i*4);
+          const finalScore = Math.round(posS*.4 + rnkS*.3 + fScore*.3);
+
+          let tier = 'paper';
+          if(i<5 && finalScore>=70) { tier='og'; ogs++; dStr+=pct; }
+          else if(finalScore>=60) { tier='diamond'; diams++; dStr+=pct; }
+          else if(fScore>=70) { tier='accumulator'; dStr+=pct; }
+          else if(finalScore>=30) tier='steady';
+
+          diamondData.push({ rank: i+1, ...holders[i], score: finalScore, tier, oCount });
+        }
+        diamondData.sort((a,b)=>b.score - a.score);
+
+        document.getElementById('diamondSummary').innerHTML = `
+          <div class="diamond-stat highlight"><div class="stat-icon">💎</div><div class="stat-label">Conviction Level</div><div class="stat-value diamond">${Math.round(dStr)}%</div></div>
+          <div class="diamond-stat"><div class="stat-icon">🏆</div><div class="stat-label">OG Entities</div><div class="stat-value gold">${ogs}</div></div>
+          <div class="diamond-stat"><div class="stat-icon">🛡️</div><div class="stat-label">Diamonds</div><div class="stat-value diamond">${diams}</div></div>
+        `;
+
+        const tMap = { og:'🏆 OG', diamond:'💎 Diamond', accumulator:'📈 Stacker', steady:'⚖️ Steady', paper:'📄 Paper' };
+        document.getElementById('diamondList').innerHTML = diamondData.map(h => `
+          <div class="data-card"><div class="data-info"><span class="data-title"><span class="tier-badge ${h.tier}" style="margin-right:10px">${tMap[h.tier]}</span> <span style="font-family:monospace;font-size:0.9rem;color:var(--text-muted)">${esc(h.holder)}</span></span><span class="data-sub">Portfolio Diversification: ${h.oCount} assets</span></div><div class="score-box"><div class="score-value">${h.score}</div><div class="score-label">Score</div></div></div>
+        `).join('');
+
+        document.getElementById('diamondResults').classList.add('active');
+        document.getElementById('exportDiamondCsvBtn').style.display = 'inline-flex';
+        showStatus('diamondStatus', 'Behavioral analysis complete.', 'success');
+      } catch(e) { showStatus('diamondStatus', e.message, 'error'); }
+    }
+    function exportDiamondCSV() {
+      let csv = 'Address,Amount,Percentage,Score,Tier\n' + diamondData.map(h => `${h.holder},${h.amount},${h.percentage},${h.score},${h.tier}`).join('\n');
+      downloadFile(csv, 'diamond_hands.csv', 'text/csv');
+    }
+
+    // --- Tool 5: NFT ---
+    let nftD = [];
+    async function fetchNFTHolders() {
+      const addr = document.getElementById('nftAddress').value.trim();
+      const count = parseInt(document.getElementById('nftTopCount').value) || 50;
+      if (!validateAddress(addr)) return showStatus('nftStatus', 'Invalid Address', 'error');
+      showStatus('nftStatus', 'Extracting NFT ownership data...', 'loading');
+      nftD = [];
+      try {
+        const endpoints = ['nft/collection/holders', 'collection/holders', 'nft/holders'];
+        let result = null, ep = null;
+        for(let e of endpoints) { try { result = await apiCall(e, {contractAddress: addr, limit: Math.min(50,count)}); if(result&&result.data) { ep=e; break; } } catch(err){} }
+        if(!result||!result.data) throw new Error('Contract not indexed or invalid.');
+        nftD.push(...result.data); let cur = result.nextPageCursor;
+        while(nftD.length<count && cur) {
+          const res = await apiCall(ep, {contractAddress:addr, limit:Math.min(50,count-nftD.length), cursor:cur});
+          if(!res.data||!res.data.length) break;
+          nftD.push(...res.data); cur = res.nextPageCursor;
+        }
+        nftD = nftD.slice(0,count);
+        document.getElementById('nftTable').innerHTML = nftD.map((h,i) => `<tr><td>${i+1}</td><td class="address">${esc(h.ownerAddress||h.holder||h.address)}</td><td class="amount">${h.amount||h.tokenCount||1}</td><td class="percentage">${parseFloat(h.percentage||0).toFixed(2)}%</td></tr>`).join('');
+        document.getElementById('nftTotalHolders').textContent = `${nftD.length} Holders`;
+        document.getElementById('nftResults').classList.add('active');
+        ['exportNftCsvBtn','copyNftAddressesBtn'].forEach(id => document.getElementById(id).style.display = 'inline-flex');
+        showStatus('nftStatus', `Snapshot acquired.`, 'success');
+      } catch(e) { showStatus('nftStatus', e.message, 'error'); }
+    }
+    function exportNFTCSV() {
+      let csv = 'Rank,Address,Held\n' + nftD.map((h,i) => `${i+1},${h.ownerAddress||h.holder||h.address},${h.amount||h.tokenCount||1}`).join('\n');
+      downloadFile(csv, 'nft_holders.csv', 'text/csv');
+    }
+    function copyNFTAddresses() {
+      navigator.clipboard.writeText(nftD.map(h=>h.ownerAddress||h.holder||h.address).join('\n')).then(()=>showStatus('nftStatus','Copied!','success'));
+    }
+
+    // --- Particle Grid ---
+    (function(){
+      if(window.innerWidth < 768) return;
+      const canvas = document.getElementById('particleGrid');
+      const ctx = canvas.getContext('2d');
+      let width, height, particles = [], mouseX = -1000, mouseY = -1000;
+
+      function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+        particles = [];
+        for(let x=25; x<width; x+=50) for(let y=25; y<height; y+=50) particles.push({ originX: x, originY: y, x: x, y: y, vx: 0, vy: 0 });
+      }
+      window.addEventListener('resize', resize);
+      document.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+      resize();
+
+      function animate() {
+        ctx.clearRect(0, 0, width, height);
+        particles.forEach(p => {
+          let dx = mouseX - p.x, dy = mouseY - p.y;
+          let dist = Math.sqrt(dx*dx + dy*dy);
+          if(dist < 120) { p.vx -= (dx/dist)*0.5; p.vy -= (dy/dist)*0.5; }
+          p.vx += (p.originX - p.x)*0.05; p.vy += (p.originY - p.y)*0.05;
+          p.vx *= 0.9; p.vy *= 0.9; p.x += p.vx; p.y += p.vy;
+
+          ctx.beginPath(); ctx.arc(p.x, p.y, 1.5, 0, Math.PI*2);
+          ctx.fillStyle = `rgba(155, 95, 255, 0.25)`; ctx.fill();
+        });
+        requestAnimationFrame(animate);
+      }
+      animate();
+    })();
+  </script>
+</body>
+</html>

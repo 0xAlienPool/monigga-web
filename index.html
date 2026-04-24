@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>$MONIGGA — Monigga Memecoin on Monad</title>
+  <meta property="og:title" content="MONIGGA — Monigga Memecoin on Monad">
+  <meta property="og:description" content="MONIGGA is the blackest nigga breathing on Monad, robber, watermelon lover, fastest nigga in town, abortion dodger, fent supplier, and Monad enthusiast.">
+  <meta property="og:image" content="images/og-image.jpg">
+  <meta property="og:url" content="https://moningga.fun">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@MONIGGA">
+
+  <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+
+  <style>
+    @font-face {
+      font-family: 'Roboto Mono';
+      font-style: normal;
+      font-weight: 500 800;
+      font-display: swap;
+      src: url(fonts/RobotoMono.ttf) format('ttf');
+    }
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #1a1a1a;
+      --text-secondary: #666666;
+      --text-muted: #aaaaaa;
+      --accent: #7B3FE4;
+      --accent-hover: #6930c3;
+      --accent-glow: rgba(123, 63, 228, 0.25);
+      --surface: #f5f3ff;
+      --surface-border: #e4d8f8;
+      --ticker-bg: rgba(255, 255, 255, 0.92);
+      --ticker-border: #e9e0f5;
+      --card-bg: #ffffff;
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #0a0a0a;
+      --text-color: #ffffff;
+      --text-secondary: #888888;
+      --text-muted: #505050;
+      --accent: #9B5FFF;
+      --accent-hover: #b080ff;
+      --accent-glow: rgba(155, 95, 255, 0.3);
+      --surface: rgba(255, 255, 255, 0.06);
+      --surface-border: rgba(255, 255, 255, 0.1);
+      --ticker-bg: rgba(15, 15, 15, 0.92);
+      --ticker-border: rgba(255, 255, 255, 0.08);
+      --card-bg: rgba(20, 20, 20, 0.6);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 130px; /* Offset for sticky header + ticker */
+    }
+
+    body {
+      background: radial-gradient(ellipse at 50% 0%, var(--accent-glow) 0%, transparent 55%), var(--bg-color);
+      color: var(--text-color);
+      font-family: 'Roboto Mono', sans-serif;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    html.theme-transition, html.theme-transition *, html.theme-transition *::before, html.theme-transition *::after {
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
+    }
+    p { padding: 8px 0px 8px 0px; }
+
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-in { opacity: 0; animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+    /* ── Header / Ticker ── */
+    .price-ticker { position: fixed; top: 0; left: 0; right: 0; background: var(--ticker-bg); border-bottom: 1px solid var(--ticker-border); backdrop-filter: blur(16px); padding: 0 24px; height: 50px; display: flex; align-items: center; gap: 16px; font-size: 13px; font-weight: 600; z-index: 100; overflow-x: auto; scrollbar-width: none; }
+    .price-ticker::-webkit-scrollbar { display: none; }
+    @media (max-width: 380px) { .price-ticker { height: 34px; gap: 4px; padding: 0 8px; font-size: 9px; } }
+    .ticker-item { display: flex; align-items: center; gap: 5px; white-space: nowrap; flex-shrink: 0; }
+    .ticker-label { color: var(--text-secondary); font-weight: 500; font-size: 11px; text-transform: uppercase; }
+    .ticker-value { color: var(--text-color); font-weight: 700; }
+    .ticker-brand { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .ticker-logo { width: 28px; height: 28px; background: rgba(255, 255, 255, 0.95); border-radius: 50%; padding: 4px; display: flex; align-items: center; justify-content: center; }
+    .ticker-name { color: var(--accent); font-weight: 800; font-size: 15px; }
+    @media (max-width: 380px) { .ticker-name { font-size: 9px; } }
+    .ticker-divider { width: 1px; height: 20px; background: var(--surface-border); }
+    .change-badge { padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+    .change-badge.positive { background: rgba(34, 197, 94, 0.12); color: #22c55e; }
+    .change-badge.negative { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
+    .ticker-spacer { flex: 1; }
+    .ticker-updated { font-size: 9px; color: var(--text-muted); font-weight: 500; }
+
+    .theme-toggle { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--surface-border); background: var(--surface); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.25s ease; position: relative; color: var(--text-color); flex-shrink: 0; }
+    .theme-toggle:hover { border-color: var(--accent); background: var(--accent-glow); }
+
+    /* ── Main Useful Navbar ── */
+    .main-navbar {
+      position: fixed; top: 50px; left: 0; right: 0; height: 70px;
+      background: var(--surface); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--surface-border); z-index: 99;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 24px; transition: all 0.3s ease; box-shadow: 0 4px 30px rgba(0,0,0,0.1);
+    }
+    .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text-color); font-weight: 800; font-size: 1.3rem; letter-spacing: -0.5px; }
+    .nav-brand img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+    .nav-links { display: flex; gap: 24px; align-items: center; }
+    .nav-links a { color: var(--text-secondary); text-decoration: none; font-weight: 700; font-size: 0.95rem; transition: color 0.2s; text-transform: uppercase; letter-spacing: 1px; }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-actions { display: flex; align-items: center; gap: 15px; }
+    .nav-social { color: var(--text-secondary); transition: color 0.2s; display: flex; align-items: center; }
+    .nav-social:hover { color: var(--accent); }
+    .nav-social svg { width: 22px; height: 22px; }
+    .btn-nav-buy { background: linear-gradient(135deg, var(--accent), #B080FF); color: #fff; padding: 10px 24px; border-radius: 999px; font-weight: 800; font-size: 0.95rem; text-decoration: none; box-shadow: 0 4px 15px var(--accent-glow); transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px; }
+    .btn-nav-buy:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(155, 95, 255, 0.5); }
+
+    .mobile-toggle { display: none; background: none; border: none; color: var(--text-color); cursor: pointer; font-size: 1.8rem; padding: 5px; }
+    .mobile-menu { display: none; position: fixed; top: 120px; left: 0; right: 0; background: var(--bg-color); border-bottom: 1px solid var(--surface-border); padding: 20px; flex-direction: column; gap: 15px; z-index: 98; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .mobile-menu.active { display: flex; animation: slideDown 0.3s ease; }
+    .mobile-link { color: var(--text-color); text-decoration: none; font-size: 1.1rem; font-weight: 700; padding: 10px 0; border-bottom: 1px solid var(--surface-border); text-transform: uppercase; }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 1024px) {
+      .nav-links { display: none; }
+      .mobile-toggle { display: block; }
+    }
+    @media (max-width: 380px) {
+      .main-navbar { top: 34px; height: 60px; padding: 0 15px;}
+      .mobile-menu { top: 94px; }
+      .btn-nav-buy { display: none; }
+    }
+
+    /* ── Utility Classes ── */
+    .wrapper { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+    .section-title { font-size: 2.8rem; font-weight: 800; text-align: center; margin-bottom: 40px; color: var(--text-color); line-height: 1.2; }
+    .section-title span { color: var(--accent); }
+    .section-padding { padding: 80px 0; }
+
+    /* ── Hero Section ── */
+    .hero-section {
+      padding-top: 180px; padding-bottom: 80px; text-align: center;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      position: relative; min-height: 85vh; overflow: hidden;
+    }
+
+    .hero-bg-glow {
+      position: absolute; width: 600px; height: 600px;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 60%);
+      top: 50%; left: 50%; transform: translate(-50%, -50%);
+      z-index: 0; filter: blur(40px); animation: pulseGlow 4s ease-in-out infinite alternate;
+    }
+    @keyframes pulseGlow { 0% { opacity: 0.6; transform: translate(-50%, -50%) scale(0.9); } 100% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } }
+
+    .floating-meme {
+      position: absolute; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+      border: 3px solid var(--surface-border); z-index: 0; pointer-events: none; opacity: 0.85;
+      object-fit: cover; transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+    .hero-section:hover .floating-meme { opacity: 1; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+    .floating-meme:nth-child(2) { top: 22%; left: 12%; width: 180px; height: 180px; animation: floatMeme 6s ease-in-out infinite; }
+    .floating-meme:nth-child(3) { top: 60%; right: 10%; width: 200px; height: 180px; animation: floatMeme 8s ease-in-out infinite reverse; }
+    .floating-meme:nth-child(4) { bottom: 25%; left: 18%; width: 160px; height: 160px; animation: floatMeme 7s ease-in-out infinite 1s; }
+    .floating-meme:nth-child(5) { top: 18%; right: 18%; width: 200px; height: 160px; animation: floatMeme 9s ease-in-out infinite 2s; }
+
+    @keyframes floatMeme { 0% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-25px) rotate(8deg); } 100% { transform: translateY(0) rotate(0deg); } }
+
+    .hero-content { z-index: 1; position: relative; }
+    .hero-logo-container { position: relative; margin-bottom: 30px; }
+    .header-logo { width: 280px; height: 280px; border-radius: 50%; object-fit: cover; }
+    .header-logo:hover { transform: scale(1.05) rotate(-5deg); }
+    .title { font-size: 4.5rem; font-weight: 800; line-height: 1.1; margin-bottom: 15px; background: linear-gradient(135deg, var(--text-color), var(--text-muted)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -2px; }
+    .subtitle { font-size: 1.5rem; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 60px; height: 30px; }
+    .typewriter-cursor { display: inline-block; width: 3px; height: 1.2em; background: var(--accent); margin-left: 4px; vertical-align: middle; animation: blink 0.7s step-end infinite; }
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* ── Primary CTA ── */
+    .hero-actions { display: flex; gap: 15px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap; }
+    .btn-primary, .btn-secondary { padding: 16px 36px; border-radius: 16px; font-size: 18px; font-weight: 800; cursor: pointer; text-decoration: none; transition: all 0.3s ease; display: inline-flex; align-items: center; justify-content: center; min-width: 180px; }
+    .btn-primary { background: linear-gradient(135deg, var(--accent), #B080FF); color: #fff; border: none; box-shadow: 0 10px 25px var(--accent-glow); }
+    .btn-primary:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 15px 35px rgba(131, 110, 249, 0.6); }
+    .btn-secondary { background: var(--surface); color: var(--text-color); border: 2px solid var(--surface-border); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+    .btn-secondary:hover { border-color: var(--accent); background: var(--accent-glow); transform: translateY(-4px) scale(1.02); }
+
+    /* ── 2 Line Horizontal Marquee ── */
+    .marquee-container { width: 100%; overflow: hidden; background: var(--surface); border-top: 1px solid var(--surface-border); border-bottom: 1px solid var(--surface-border); padding: 30px 0; display: flex; flex-direction: column; gap: 20px; }
+    .marquee-track { display: flex; width: max-content; gap: 20px; }
+    .marquee-track.left { animation: scrollLeft 40s linear infinite; }
+    .marquee-track.right { animation: scrollRight 40s linear infinite; transform: translateX(-50%); }
+    .marquee-track:hover { animation-play-state: paused; }
+    .marquee-item { width: 240px; height: 240px; border-radius: 16px; object-fit: cover; border: 1px solid var(--surface-border); box-shadow: 0 10px 20px rgba(0,0,0,0.2); transition: transform 0.3s ease, border-color 0.3s ease; }
+    .marquee-item:hover { transform: scale(1.05); border-color: var(--accent); z-index: 2; position: relative; }
+    @keyframes scrollLeft { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    @keyframes scrollRight { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
+
+    /* ── Intro Monigga Section ── */
+    .intro-container {
+      display: flex; align-items: center; gap: 60px; background: var(--surface); border: 1px solid var(--surface-border);
+      border-radius: 32px; padding: 60px; backdrop-filter: blur(12px); box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+      position: relative; overflow: hidden; margin-top: 60px;
+    }
+    .intro-container::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 0% 0%, var(--accent-glow) 0%, transparent 50%); pointer-events: none; }
+    .intro-image { flex: 1; position: relative; }
+    .intro-image img { width: 100%; border-radius: 24px; position: relative; z-index: 2; transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+    .intro-image:hover img { transform: translateY(-10px) scale(1.02); box-shadow: 0 30px 60px var(--accent-glow); }
+    .intro-glow { position: absolute; inset: -20px; background: var(--accent); filter: blur(50px); opacity: 0.3; z-index: 1; animation: pulseGlow 3s alternate infinite; }
+    .intro-content { flex: 1.2; z-index: 2; }
+    .intro-content h2 { text-align: left; margin-bottom: 20px; }
+    .intro-content p { font-size: 1.15rem; color: var(--text-secondary); line-height: 1.4; margin-bottom: 8px; }
+    .intro-content p strong { color: var(--text-color); font-weight: 700; }
+
+    /* ── Centered About Section ── */
+    .about-centered {
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      background: var(--surface); border: 1px solid var(--surface-border);
+      border-radius: 40px; padding: 60px 40px; backdrop-filter: blur(12px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.1); position: relative; overflow: hidden; margin-top: 60px;
+    }
+    .about-centered::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 50% 0%, var(--accent-glow) 0%, transparent 70%); pointer-events: none; }
+    .about-image-wrapper { position: relative; width: 100%; max-width: 900px; margin: 0 auto 40px; z-index: 2; }
+    .about-image-wrapper img { width: 100%; border-radius: 24px; border: 1px solid var(--surface-border); box-shadow: 0 30px 60px rgba(0,0,0,0.4); transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+    .about-image-wrapper:hover img { transform: translateY(-10px) scale(1.02); box-shadow: 0 40px 80px var(--accent-glow); border-color: var(--accent); }
+    .about-glow { position: absolute; inset: -30px; background: var(--accent); filter: blur(60px); opacity: 0.25; z-index: -1; animation: pulseGlow 4s alternate infinite; }
+    .about-text { max-width: 800px; text-align: justify; font-size: 1.15rem; color: var(--text-secondary); line-height: 1.4; z-index: 2; position: relative; }
+    .about-text strong { color: var(--text-color); font-weight: 700; }
+
+    /* ── Monigga's Ethics Section ── */
+    .ethics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 20px; }
+    .ethic-card {
+      background: rgba(0,0,0,0.2); border: 1px solid var(--surface-border); border-radius: 24px;
+      padding: 40px 30px; position: relative; overflow: hidden; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); backdrop-filter: blur(10px);
+    }
+    [data-theme="light"] .ethic-card { background: rgba(255,255,255,0.6); }
+    .ethic-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, var(--accent-glow) 0%, transparent 100%); opacity: 0; transition: opacity 0.4s; pointer-events: none; }
+    .ethic-card:hover { transform: translateY(-10px); border-color: var(--accent); box-shadow: 0 20px 40px var(--accent-glow); }
+    .ethic-card:hover::before { opacity: 0.5; }
+    .ethic-icon { font-size: 50px; margin-bottom: 20px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3)); transition: transform 0.4s; }
+    .ethic-card:hover .ethic-icon { transform: scale(1.1) rotate(-5deg); }
+    .ethic-card h3 { font-size: 1.6rem; font-weight: 800; margin-bottom: 15px; color: var(--text-color); }
+    .ethic-card p { font-size: 1.05rem; color: var(--text-secondary); line-height: 1.6; }
+
+    /* ── Explore & Games Grid ── */
+    .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; margin-top: 20px; }
+    .feature-card {
+      background: var(--card-bg); border: 1px solid var(--surface-border); border-radius: 24px; padding: 40px 24px;
+      text-align: center; text-decoration: none; color: var(--text-color); display: flex; flex-direction: column;
+      align-items: center; gap: 15px; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+    .feature-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, transparent, var(--accent-glow)); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+    .feature-card:hover { transform: translateY(-8px); border-color: var(--accent); box-shadow: 0 15px 35px var(--accent-glow); }
+    .feature-card:hover::before { opacity: 1; }
+    .feature-icon { font-size: 48px; line-height: 1; margin-bottom: 5px; transition: transform 0.3s; }
+    .feature-card:hover .feature-icon { transform: scale(1.1) rotate(5deg); }
+    .feature-card h3 { font-size: 1.4rem; font-weight: 800; color: var(--text-color); }
+    .feature-card p { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.5; margin: 0; }
+
+    /* ── TECH MODEL TOKEN SCANNER ── */
+    .scanner-section {
+      display: flex; align-items: center; gap: 50px; background: var(--surface); border: 1px solid var(--surface-border);
+      border-radius: 32px; padding: 60px; position: relative; overflow: hidden; margin: 80px auto; backdrop-filter: blur(12px); box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+    }
+    .scanner-section::before {
+      content: ''; position: absolute; inset: 0; background-image: linear-gradient(var(--accent-glow) 1px, transparent 1px), linear-gradient(90deg, var(--accent-glow) 1px, transparent 1px);
+      background-size: 40px 40px; opacity: 0.15; pointer-events: none;
+    }
+    .scanner-text { flex: 1; z-index: 1; text-align: left; }
+    .scanner-text h2 { font-size: 3.2rem; font-weight: 800; line-height: 1.1; margin-bottom: 20px; color: var(--text-color); }
+    .scanner-text h2 span { color: var(--accent); text-shadow: 0 0 15px var(--accent-glow); }
+    .scanner-text p { font-size: 1.15rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 30px; }
+    .scanner-features { list-style: none; margin-bottom: 35px; color: var(--text-color); display: flex; flex-direction: column; gap: 12px; font-weight: 600; font-size: 1.1rem; }
+    .scanner-features li { display: flex; align-items: center; gap: 10px; }
+    .scanner-features li svg { color: #00E676; filter: drop-shadow(0 0 5px rgba(0,230,118,0.5)); }
+
+    .scanner-terminal {
+      flex: 1; background: #050508; border: 1px solid rgba(155, 95, 255, 0.4); border-radius: 20px; padding: 30px; position: relative;
+      font-family: 'Space Mono', monospace; font-size: 0.95rem; box-shadow: 0 0 40px rgba(155, 95, 255, 0.15), inset 0 0 20px rgba(0,0,0,0.8); z-index: 1; overflow: hidden;
+    }
+    .scanner-terminal-header { display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(255,255,255,0.15); padding-bottom: 15px; margin-bottom: 20px; color: var(--accent); font-weight: 700; font-size: 1.1rem; }
+    .scanner-line { display: flex; justify-content: space-between; margin-bottom: 12px; align-items: center; }
+    .scanner-label { color: #888; }
+    .scanner-val.safe { color: #00E676; text-shadow: 0 0 10px rgba(0,230,118,0.4); font-weight: 700; background: rgba(0,230,118,0.1); padding: 4px 10px; border-radius: 6px; }
+    .scanner-laser { position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent); box-shadow: 0 0 15px var(--accent), 0 0 40px var(--accent); animation: scanLaser 3s ease-in-out infinite alternate; z-index: 5; }
+    @keyframes scanLaser { 0% { top: 10%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 90%; opacity: 0; } }
+    .scanner-log { margin-top: 20px; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 20px; color: #00E676; font-size: 0.85rem; opacity: 0.85; line-height: 1.8; }
+    .blink-cursor { animation: blink 1s step-end infinite; }
+
+    /* ── Meme Maker Explain Section ── */
+    .meme-maker-section {
+      display: flex; align-items: center; gap: 60px; padding: 60px; background: var(--surface); border: 1px solid var(--surface-border);
+      border-radius: 40px; margin: 80px auto; backdrop-filter: blur(12px); box-shadow: 0 20px 50px rgba(0,0,0,0.05); position: relative; overflow: hidden;
+    }
+    .meme-maker-section::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 100% 50%, var(--accent-glow) 0%, transparent 60%); pointer-events: none; }
+    .meme-maker-text { flex: 1; z-index: 1; }
+    .meme-maker-text h2 { font-size: 3.2rem; font-weight: 800; line-height: 1.1; margin-bottom: 20px; color: var(--text-color); }
+    .meme-maker-text h2 span { color: var(--accent); }
+    .meme-maker-text p { font-size: 1.15rem; color: var(--text-secondary); line-height: 1.7; margin-bottom: 30px; }
+    .mm-features { display: flex; flex-direction: column; gap: 16px; margin-bottom: 35px; }
+    .mm-feature { display: flex; align-items: center; gap: 15px; font-weight: 700; font-size: 1.1rem; color: var(--text-color); }
+    .mm-icon { width: 44px; height: 44px; border-radius: 12px; background: rgba(123, 63, 228, 0.15); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; border: 1px solid rgba(123, 63, 228, 0.3); }
+    .meme-maker-visual { flex: 1; position: relative; display: flex; justify-content: center; z-index: 1; }
+    .mm-app-mockup {
+      background: var(--bg-color); border: 1px solid var(--surface-border); border-radius: 28px; padding: 24px;
+      width: 100%; max-width: 400px; box-shadow: 0 30px 60px rgba(0,0,0,0.25); transform: perspective(1000px) rotateY(-8deg) rotateX(4deg); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .meme-maker-visual:hover .mm-app-mockup { transform: perspective(1000px) rotateY(0deg) rotateX(0deg) translateY(-10px); box-shadow: 0 40px 80px var(--accent-glow); }
+    .mm-app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .mm-app-dots { display: flex; gap: 8px; }
+    .mm-dot { width: 12px; height: 12px; border-radius: 50%; }
+    .mm-dot:nth-child(1) { background: #ff5f56; } .mm-dot:nth-child(2) { background: #ffbd2e; } .mm-dot:nth-child(3) { background: #27c93f; }
+    .mm-app-title { font-size: 12px; font-weight: 800; letter-spacing: 1px; color: var(--text-muted); }
+    .mm-canvas { position: relative; width: 100%; aspect-ratio: 1/1; border-radius: 16px; overflow: hidden; margin-bottom: 20px; display: flex; flex-direction: column; justify-content: space-between; padding: 20px; background: #000; border: 1px solid var(--surface-border); }
+    .mm-canvas img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.8; z-index: 0; transition: opacity 0.3s; }
+    .meme-maker-visual:hover .mm-canvas img { opacity: 1; }
+    .mm-text { position: relative; z-index: 1; font-family: Impact, 'Arial Black', sans-serif; font-size: 34px; line-height: 1.1; color: white; text-transform: uppercase; text-align: center; letter-spacing: 1px; text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 0 4px 15px rgba(0,0,0,0.8); }
+    .mm-controls { display: flex; flex-direction: column; gap: 12px; }
+    .mm-input-row { display: flex; gap: 10px; }
+    .mm-input { flex: 1; background: var(--surface); border: 1px solid var(--surface-border); border-radius: 12px; padding: 14px; font-size: 14px; color: var(--text-color); font-weight: 600; font-family: inherit; }
+    .mm-btn { background: var(--accent); color: white; border: none; border-radius: 12px; padding: 14px; font-weight: 800; font-size: 15px; cursor: pointer; transition: background 0.3s; }
+    .mm-btn:hover { background: var(--accent-hover); }
+    .mm-floating-emoji { position: absolute; font-size: 45px; filter: drop-shadow(0 15px 15px rgba(0,0,0,0.25)); z-index: 2; animation: floatEmoji 4s ease-in-out infinite; pointer-events: none; }
+
+    /* ── BEAUTIFUL COMMUNITY MEMES HEADER ── */
+    .meme-section-header {
+      display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 30px;
+      margin-bottom: 40px; background: linear-gradient(135deg, rgba(255,255,255,0.03), transparent);
+      border: 1px solid var(--surface-border); border-radius: 24px; padding: 40px; position: relative; overflow: hidden;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    }
+    .meme-section-header::before {
+      content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+      background: linear-gradient(90deg, var(--accent), #FF5E94, var(--accent));
+      background-size: 200% 100%; animation: gradientFlow 3s linear infinite;
+    }
+    @keyframes gradientFlow { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+    .ms-info { flex: 1; min-width: 300px; }
+    .ms-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 94, 148, 0.15); color: #FF5E94; padding: 6px 14px; border-radius: 999px; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; border: 1px solid rgba(255, 94, 148, 0.3); }
+    .ms-badge .pulse-dot { width: 8px; height: 8px; background: #FF5E94; border-radius: 50%; box-shadow: 0 0 10px #FF5E94; animation: pulseData 1.5s infinite; }
+    @keyframes pulseData { 0% { box-shadow: 0 0 0 0 rgba(255,94,148,0.4); } 70% { box-shadow: 0 0 0 10px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+    .ms-info h2 { text-align: left; margin-bottom: 10px; font-size: 3.2rem; }
+    .ms-info p { color: var(--text-secondary); font-size: 1.15rem; max-width: 600px; line-height: 1.6; }
+    .ms-actions { display: flex; gap: 15px; flex-wrap: wrap; }
+
+    /* ── Bento Box Meme Section ── */
+    .meme-bento { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 240px; gap: 20px; }
+    .bento-item {
+      position: relative; border-radius: 24px; overflow: hidden; border: 1px solid var(--surface-border);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; background: var(--surface);
+    }
+    .bento-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+    .bento-item:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 25px 50px rgba(0,0,0,0.5), 0 0 40px var(--accent-glow); border-color: var(--accent); z-index: 2; }
+    .bento-item:hover img { transform: scale(1.1); }
+    .bento-overlay {
+      position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.7), transparent 60%); opacity: 0; transition: opacity 0.3s ease; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); pointer-events: none;
+    }
+    .bento-overlay span {
+      background: rgba(255,255,255,0.2); width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transform: scale(0.5); opacity: 0; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); color: #fff;
+    }
+    .bento-item:hover .bento-overlay { opacity: 1; }
+    .bento-item:hover .bento-overlay span { transform: scale(1); opacity: 1; }
+    .bento-item:nth-child(1) { grid-column: span 2; grid-row: span 2; }
+    .bento-item:nth-child(2) { grid-column: span 1; grid-row: span 1; }
+    .bento-item:nth-child(3) { grid-column: span 1; grid-row: span 1; }
+    .bento-item:nth-child(4) { grid-column: span 2; grid-row: span 1; }
+    .bento-item:nth-child(5) { grid-column: span 1; grid-row: span 1; }
+    .bento-item:nth-child(6) { grid-column: span 1; grid-row: span 1; }
+
+    /* ── Interactive Trade & Chart Section ── */
+    .trade-container {
+      display: flex; gap: 30px; background: var(--surface); border: 1px solid var(--surface-border);
+      border-radius: 32px; padding: 30px; backdrop-filter: blur(12px); box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+    .trade-links-panel { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 20px; padding: 20px 10px; }
+    .trade-links-panel h3 { font-size: 2.2rem; font-weight: 800; line-height: 1.2; }
+    .trade-links-panel p { color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 10px; }
+    .trade-btn {
+      padding: 16px 24px; border-radius: 16px; font-weight: 800; font-size: 1.1rem; text-decoration: none;
+      display: flex; align-items: center; justify-content: space-between; transition: all 0.3s ease;
+      border: 1px solid transparent; color: #fff; position: relative; overflow: hidden;
+    }
+    .trade-btn svg { width: 24px; height: 24px; transition: transform 0.3s; }
+    .trade-btn:hover { transform: translateX(8px); }
+    .trade-btn:hover svg { transform: translateX(4px); }
+
+    .btn-nad { background: linear-gradient(135deg, #FF3366, #FF6B33); box-shadow: 0 8px 20px rgba(255, 51, 102, 0.25); }
+    .btn-kuru { background: linear-gradient(135deg, #00C6FF, #0072FF); box-shadow: 0 8px 20px rgba(0, 198, 255, 0.25); }
+    .btn-dex { background: #1C1C28; border: 1px solid #333; color: #fff; box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+    [data-theme="light"] .btn-dex { background: #f0f0f0; color: #111; border-color: #ddd; }
+
+    .btn-nad:hover { box-shadow: 0 12px 25px rgba(255, 51, 102, 0.4); }
+    .btn-kuru:hover { box-shadow: 0 12px 25px rgba(0, 198, 255, 0.4); }
+    .btn-dex:hover { background: #2A2A3C; border-color: #555; }
+    [data-theme="light"] .btn-dex:hover { background: #e4e4e4; }
+
+    .chart-panel { flex: 2; border-radius: 20px; overflow: hidden; border: 1px solid var(--surface-border); background: #000; min-height: 450px; position: relative; }
+    .chart-panel iframe { width: 100%; height: 100%; position: absolute; inset: 0; border: none; }
+
+    /* ── FAQ Section ── */
+    .faq-container { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+    details { background: var(--surface); border: 1px solid var(--surface-border); border-radius: 16px; overflow: hidden; transition: all 0.3s ease; }
+    details:hover { border-color: var(--accent); }
+    details[open] { background: rgba(255,255,255,0.02); }
+    [data-theme="light"] details[open] { background: #fff; }
+    summary { padding: 24px; font-size: 1.2rem; font-weight: 700; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; color: var(--text-color); }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: "+"; font-size: 1.5rem; color: var(--accent); transition: transform 0.3s ease; }
+    details[open] summary::after { content: "−"; transform: rotate(180deg); }
+    .faq-content { padding: 0 24px 24px; color: var(--text-secondary); line-height: 1.7; font-size: 1.1rem; }
+
+    /* ── Contract Banner ── */
+    .contract-banner { background: var(--surface); border: 1px solid var(--surface-border); border-radius: 20px; padding: 20px 30px; display: flex; align-items: center; justify-content: space-between; gap: 20px; max-width: 800px; margin: 40px auto 60px; flex-wrap: wrap; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    .contract-info { display: flex; flex-direction: column; }
+    .contract-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+    .contract-address { font-family: 'Roboto Mono', monospace; font-size: 16px; font-weight: 600; color: var(--text-color); cursor: pointer; display: flex; align-items: center; gap: 10px; transition: color 0.2s; }
+    .contract-address:hover { color: var(--accent); }
+    .monad-badge { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; background: rgba(131, 110, 249, 0.1); color: var(--accent); padding: 8px 16px; border-radius: 999px; border: 1px solid rgba(131, 110, 249, 0.3); }
+
+    /* ── Floating Music Player ── */
+    .music-player {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 10px 20px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      z-index: 990;
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+    .music-player:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: 0 15px 35px var(--accent-glow);
+    }
+    .player-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 15px var(--accent-glow);
+    }
+    .player-btn:hover {
+      background: var(--accent-hover);
+      transform: scale(1.1);
+    }
+    .volume-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .volume-icon {
+      color: var(--text-muted);
+      font-size: 16px;
+    }
+    .volume-slider {
+      -webkit-appearance: none;
+      width: 80px;
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      outline: none;
+    }
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+    .song-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-right: 5px;
+    }
+    .disc-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #B080FF);
+      animation: spin 3s linear infinite;
+      animation-play-state: paused;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .disc-icon::after {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--bg-color);
+      border-radius: 50%;
+    }
+    .disc-icon.playing {
+      animation-play-state: running;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    /* ── Modals & Footer ── */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 1000; justify-content: center; align-items: center; padding: 20px; opacity: 0; transition: opacity 0.3s ease; }
+    .modal-overlay.active { display: flex; opacity: 1; }
+    .modal-content { width: 100%; max-width: 1100px; height: 80vh; background: #111; border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); position: relative; }
+    .modal-content iframe { width: 100%; height: 100%; border: none; }
+    .modal-close { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; width: 44px; height: 44px; border-radius: 50%; font-size: 24px; cursor: pointer; transition: 0.3s; z-index: 1001; display: flex; align-items: center; justify-content: center; }
+    .modal-close:hover { background: var(--accent); border-color: var(--accent); transform: scale(1.1); }
+
+    .footer { text-align: center; padding: 40px 0; border-top: 1px solid var(--surface-border); margin-top: 20px; font-size: 14px; color: var(--text-muted); font-weight: 500; }
+    .footer a { color: var(--text-muted); text-decoration: none; margin: 0 10px; transition: color 0.2s; font-weight: 700; }
+    .footer a:hover { color: var(--accent); }
+
+    .toast { position: fixed; bottom: 40px; left: 50%; transform: translate(-50%, 20px); background: var(--text-color); color: var(--bg-color); padding: 12px 24px; border-radius: 999px; font-weight: 700; font-size: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); opacity: 0; pointer-events: none; transition: all 0.3s ease; z-index: 2000; }
+    .toast.visible { opacity: 1; transform: translate(-50%, 0); }
+
+    #particleGrid { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0.5; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .trade-container { flex-direction: column; }
+      .chart-panel { min-height: 400px; }
+      .hide-mobile { display: none !important; }
+      .meme-bento { grid-template-columns: repeat(3, 1fr); grid-auto-rows: 200px; }
+      .bento-item:nth-child(4) { grid-column: span 3; }
+      .bento-item:nth-child(5), .bento-item:nth-child(6) { display: none; }
+      .meme-maker-section { flex-direction: column; padding: 40px 20px; text-align: center; }
+      .mm-features { align-items: center; }
+      .mm-app-mockup { transform: none; }
+      .meme-maker-visual:hover .mm-app-mockup { transform: translateY(-10px); }
+      .intro-container { flex-direction: column; padding: 30px; text-align: center; }
+      .intro-content h2 { text-align: center; }
+      .about-centered { padding: 40px 20px; }
+      .scanner-section { flex-direction: column; padding: 40px 20px; text-align: left; }
+      .scanner-terminal { width: 100%; }
+      .meme-section-header { flex-direction: column; text-align: center; align-items: center; }
+      .ms-info h2 { text-align: center; font-size: 2.8rem; }
+      .ms-actions { justify-content: center; }
+    }
+    @media (max-width: 768px) {
+      .title { font-size: 3.2rem; }
+      .header-logo { width: 200px; height: 200px; }
+      .contract-banner { flex-direction: column; align-items: flex-start; margin: 40px 20px; }
+      .ticker-item.hide-mobile { display: none; }
+      .feature-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .meme-bento { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 180px; }
+      .bento-item:nth-child(1) { grid-column: span 2; grid-row: span 2; }
+      .bento-item:nth-child(4) { grid-column: span 2; }
+      .music-player { bottom: 20px; right: 20px; padding: 8px 15px; }
+      .volume-slider { width: 50px; }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="particleGrid"></canvas>
+
+  <div class="price-ticker" id="priceTicker">
+    <div class="ticker-brand">
+      <span class="ticker-name">$MONIGGA</span>
+    </div>
+    <div class="ticker-divider"></div>
+    <div class="ticker-item"><span class="ticker-value" id="tokenPrice">--</span></div>
+    <div class="ticker-item"><span class="change-badge" id="priceChange">--</span></div>
+    <div class="ticker-item"><span class="ticker-label">MC</span> <span class="ticker-value" id="marketCap">--</span></div>
+    <div class="ticker-item hide-mobile"><span class="ticker-label">Vol</span> <span class="ticker-value" id="tickerVolume">--</span></div>
+    <div class="ticker-item hide-mobile"><span class="ticker-label">Liq</span><span class="ticker-value" id="tickerLiquidity">--</span></div>
+    <div class="ticker-item hide-mobile"><span class="ticker-label">FDV</span><span class="ticker-value" id="tickerFdv">--</span></div>
+    <span class="ticker-spacer"></span>
+    <span class="ticker-updated" id="tickerUpdated">Connecting...</span>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle Theme">🌓</button>
+  </div>
+
+  <nav class="main-navbar animate-in" id="mainNavbar">
+    <a href="#" class="nav-brand">
+      <img src="images/monigga-200.jpg" alt="Monigga">
+      <span>$MONIGGA</span>
+    </a>
+    <div class="nav-links">
+      <a href="#about">About</a>
+      <a href="#ecosystem">Ecosystem</a>
+      <a href="#memes">Memes</a>
+      <a href="#tools">Tools</a>
+      <a href="#trade">Trade</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <div class="nav-actions">
+      <a href="https://twitter.com/moniggax" target="_blank" class="nav-social">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+      </a>
+      <a href="https://t.me/moniggas" target="_blank" class="nav-social">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.664 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+      </a>
+      <a href="#trade" class="btn-nav-buy">Buy $MONIGGA</a>
+      <button class="mobile-toggle" id="mobileMenuBtn">☰</button>
+    </div>
+  </nav>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#about" class="mobile-link">About</a>
+    <a href="#ethics" class="mobile-link">Ethics</a>
+    <a href="#ecosystem" class="mobile-link">Ecosystem</a>
+    <a href="#tools" class="mobile-link">Tools</a>
+    <a href="#memes" class="mobile-link">Memes</a>
+    <a href="#trade" class="mobile-link">Trade</a>
+    <a href="#faq" class="mobile-link">FAQ</a>
+    <div style="display:flex; gap: 15px; margin-top: 10px;">
+      <a href="https://twitter.com/moniggax" target="_blank" class="nav-social"><svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg></a>
+      <a href="https://t.me/moniggas" target="_blank" class="nav-social"><svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.664 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></a>
+    </div>
+  </div>
+
+  <header class="hero-section wrapper animate-in" style="animation-delay:0.1s">
+    <div class="hero-bg-glow"></div>
+    <img src="memes/monigga-art-8.jpg" class="floating-meme hide-mobile" alt="Meme Art 1">
+    <img src="memes/monigga-art-12.jpg" class="floating-meme hide-mobile" alt="Meme Art 2">
+    <img src="memes/monigga-art-23.jpg" class="floating-meme hide-mobile" alt="Meme Art 3">
+    <img src="memes/monigga-art-41.jpg" class="floating-meme hide-mobile" alt="Meme Art 4">
+
+    <div class="hero-content">
+      <div class="hero-logo-container">
+        <img src="images/monigga.png" alt="$MONIGGA Logo" class="header-logo">
+      </div>
+      <h1 class="title">The Moniggaverse</h1>
+      <p class="subtitle" id="subtitle"><span class="typewriter-cursor"></span></p>
+
+      <div class="hero-actions">
+        <a href="#trade" class="btn-primary">Buy $MONIGGA</a>
+        <a href="memes.html" class="btn-secondary">Explore Memes</a>
+      </div>
+    </div>
+    <div class="wrapper animate-in" style="animation-delay:0.8s">
+      <div class="contract-banner">
+        <div class="contract-info">
+          <span class="contract-label">$MONIGGA Contract</span>
+          <span class="contract-address" onclick="copyContract()">
+            0x73b62FF...630247777
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="margin-left: 5px;"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+          </span>
+        </div>
+        <div class="monad-badge">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 3c-2.599 0-9 6.4-9 9s6.401 9 9 9s9-6.401 9-9s-6.401-9-9-9m-1.402 14.146c-1.097-.298-4.043-5.453-3.744-6.549s5.453-4.042 6.549-3.743c1.095.298 4.042 5.453 3.743 6.549c-.298 1.095-5.453 4.042-6.549 3.743"></path></svg>
+          Live on Monad
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="marquee-container animate-in" style="animation-delay:0.2s">
+    <div class="marquee-track left">
+      <img src="templates/gifs/monigga-1.gif" class="marquee-item" alt="Art">
+      <img src="templates/gifs/monigga-2.gif" class="marquee-item" alt="Art">
+      <img src="templates/gifs/monigga-3.gif" class="marquee-item" alt="Art">
+      <img src="templates/gifs/monigga-4.gif" class="marquee-item" alt="Art">
+      <img src="templates/gifs/monigga-5.gif" class="marquee-item" alt="Art">
+      <img src="templates/gifs/monigga-6.gif" class="marquee-item" alt="Art">
+      <img src="templates/gifs/monigga-7.gif" class="marquee-item" alt="Art">
+      <img src="templates/gifs/monigga-8.gif" class="marquee-item" alt="Art">
+      <img src="templates/gifs/monigga-9.gif" class="marquee-item" alt="Art">
+      <img src="templates/gifs/monigga-10.gif" class="marquee-item" alt="Art">
+    </div>
+    <div class="marquee-track right">
+      <img src="templates/gifs/monigga-11.gif" class="marquee-item" alt="Art">
+      <img src="templates/gifs/monigga-12.gif" class="marquee-item" alt="Art">
+      <img src="templates/gifs/monigga-13.gif" class="marquee-item" alt="Art">
+      <img src="templates/gifs/monigga-14.gif" class="marquee-item" alt="Art">
+      <img src="templates/gifs/monigga-15.gif" class="marquee-item" alt="Art">
+      <img src="templates/gifs/monigga-16.gif" class="marquee-item" alt="Art">
+      <img src="templates/gifs/monigga-17.gif" class="marquee-item" alt="Art">
+      <img src="templates/gifs/monigga-18.gif" class="marquee-item" alt="Art">
+      <img src="templates/gifs/monigga-19.gif" class="marquee-item" alt="Art">
+      <img src="templates/gifs/monigga-20.gif" class="marquee-item" alt="Art">
+    </div>
+  </section>
+
+  <section class="wrapper animate-in" style="animation-delay:0.3s" id="about">
+    <div class="intro-container">
+      <div class="intro-image">
+        <div class="intro-glow"></div>
+        <img src="images/logo.png" alt="Intro Monigga">
+      </div>
+      <div class="intro-content">
+        <h2 class="section-title">Who is <span>Monigga?</span></h2>
+        <p>Monigga is the blackest nigga breathing on Monad. His nigga dad left him before he was born, luckily his nigga mom was able to survive off of KFC and Watermelon so she did not need to abort him.</p>
+        <p>Born in the deepest trenches of the <strong>Monad ecosystem</strong>, Monigga isn't just another memecoin—it's a lifestyle. We represent the absolute rawest, most unfiltered energy on the blockchain.</p>
+        <p>When the market dumps, Monigga pumps. We thrive in the chaos, laugh in the face of red candles, and build immersive games, raw art, and killer tools for the realest community in crypto.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrapper animate-in" style="animation-delay:0.35s">
+    <div class="about-centered">
+      <h2 class="section-title">About <span>Monigga</span></h2>
+
+      <div class="about-text">
+        <p>Monigga got into the crypto space with the money he made selling weed. He was always treated poorly though because he was a nigga. Monigga then joined Monad's Discord where he was treated as an equal.</p>
+        <p>With the $MON airdrop, Monigga was able to go two whole weeks without stealing bicycles, and was able to buy extra KFC, Watermelon, and Kool-aid for about a month.</p>
+        <p>The Moniggaverse represents the vanguard of decentralized destiny. From our raw, unfiltered beginnings in the Monad trenches to building an immersive ecosystem of games, art, and trading tools, our legacy is forged by a community that refuses to back down.</p>
+        <p><strong>Powerful, relentless, and absolutely unfiltered.</strong> We are setting a new standard for what a memecoin can achieve when backed by a diamond-handed family.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrapper section-padding animate-in" style="animation-delay:0.4s" id="ethics">
+    <h2 class="section-title">Monigga's <span>Ethics</span></h2>
+    <div class="ethics-grid">
+      <div class="ethic-card">
+        <div class="ethic-icon">🏴‍☠️</div>
+        <h3>Trench Warfare</h3>
+        <p>We survive the bloodiest red days. No capitulation, only accumulation. Diamond hands are forged in the absolute abyss.</p>
+      </div>
+      <div class="ethic-card">
+        <div class="ethic-icon">🎨</div>
+        <h3>Raw Culture</h3>
+        <p>Unfiltered, uncensored, unbothered. Our memes dictate the narrative. We don't follow blockchain trends; we create them.</p>
+      </div>
+      <div class="ethic-card">
+        <div class="ethic-icon">🤝</div>
+        <h3>Family First</h3>
+        <p>The Moniggaverse protects its own. A decentralized brotherhood building games, tools, and generational wealth together.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrapper section-padding animate-in" style="animation-delay:0.45s" id="ecosystem">
+    <h2 class="section-title">Explore the <span>Moniggaverse</span></h2>
+    <div class="feature-grid">
+      <a href="memes.html" class="feature-card">
+        <div class="feature-icon">🎭</div>
+        <h3>Meme Gallery</h3>
+        <p>Dive into the deepest trenches of Monigga culture.</p>
+      </a>
+      <a href="meme-maker.html" class="feature-card">
+        <div class="feature-icon">🎨</div>
+        <h3>Meme Maker</h3>
+        <p>Create your own certified hood classics instantly.</p>
+      </a>
+      <a href="test-tool/tools.html" class="feature-card">
+        <div class="feature-icon">🕹️</div>
+        <h3>Monigga Tools</h3>
+        <p>Elite on-chain utilities for holders, traders, and builders.</p>
+      </a>
+    </div>
+  </section>
+
+  <section class="wrapper animate-in" style="animation-delay: 0.48s;" id="tools">
+    <div class="scanner-section">
+      <div class="scanner-text">
+        <h2>Monigga <span>Tools</span></h2>
+        <p>We believe in absolute transparency. Verify our on-chain metrics, liquidity locks, and contract safety directly through our native Monad scanner tools.</p>
+        <ul class="scanner-features">
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> <strong>Contract:</strong> Renounced & Immutable</li>
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> <strong>Liquidity:</strong> Burned forever</li>
+          <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> <strong>Taxes:</strong> 0% Buy / 0% Sell</li>
+        </ul>
+        <a href="test-tool/tools.html" class="btn-primary" style="margin-top: 10px;">Check Tokens</a>
+      </div>
+
+      <div class="scanner-terminal">
+        <div class="scanner-laser"></div>
+        <div class="scanner-terminal-header">
+          <span>MONIGGA_SCAN.EXE</span>
+          <span>v1.0.4</span>
+        </div>
+        <div class="scanner-line"><span class="scanner-label">TARGET:</span> <span style="color:#fff;">0x73b6...7777</span></div>
+        <div class="scanner-line"><span class="scanner-label">NETWORK:</span> <span style="color:#fff;">MONAD</span></div>
+        <br>
+        <div class="scanner-line"><span class="scanner-label">HONEYPOT CHECK:</span> <span class="scanner-val safe">PASSED</span></div>
+        <div class="scanner-line"><span class="scanner-label">MINT FUNCTION:</span> <span class="scanner-val safe">REVOKED</span></div>
+        <div class="scanner-line"><span class="scanner-label">OWNER PRIVILEGES:</span> <span class="scanner-val safe">RENOUNCED</span></div>
+        <div class="scanner-line"><span class="scanner-label">BUY TAX:</span> <span class="scanner-val safe">0%</span></div>
+        <div class="scanner-line"><span class="scanner-label">SELL TAX:</span> <span class="scanner-val safe">0%</span></div>
+        <div class="scanner-line"><span class="scanner-label">LIQUIDITY:</span> <span class="scanner-val safe">100% BURNED</span></div>
+
+        <div class="scanner-log">
+          > Analyzing contract byte code...<br>
+          > No malicious functions detected.<br>
+          > Community trust score: 99.9%<br>
+          <span class="blink-cursor">> STATUS: SAFE TO APE _</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrapper animate-in" style="animation-delay: 0.5s;">
+    <div class="meme-maker-section">
+      <div class="meme-maker-text">
+        <h2>The Ultimate <span>Meme Forge</span></h2>
+        <p>Don't just laugh at the culture—create it. Our built-in Meme Maker lets you instantly slap text, stickers, and filters onto official Monigga templates to mint your own certified hood classics directly in your browser.</p>
+
+        <div class="mm-features">
+          <div class="mm-feature"><div class="mm-icon">🖼️</div> 100+ Official Monigga Templates</div>
+          <div class="mm-feature"><div class="mm-icon">✨</div> Instant Generation & Export</div>
+          <div class="mm-feature"><div class="mm-icon">🔥</div> Custom Monigga Stickers & Assets</div>
+        </div>
+
+        <a href="meme-maker.html" class="btn-primary" style="margin-top: 10px;">Launch Meme Maker</a>
+      </div>
+
+      <div class="meme-maker-visual">
+        <div class="mm-app-mockup">
+          <div class="mm-app-header">
+            <div class="mm-app-dots">
+              <span class="mm-dot"></span><span class="mm-dot"></span><span class="mm-dot"></span>
+            </div>
+            <span class="mm-app-title">MONIGGA STUDIO</span>
+          </div>
+
+          <div class="mm-canvas">
+            <img src="images/monigga-art-61.jpg" alt="Meme Template">
+            <div class="mm-text">WHEN YOU SECURE</div>
+            <div class="mm-text">THE BAG EARLY</div>
+          </div>
+
+          <div class="mm-controls">
+            <div class="mm-input-row">
+              <div class="mm-input" style="color:var(--text-secondary)">Top text...</div>
+            </div>
+            <div class="mm-input-row">
+              <div class="mm-input" style="color:var(--text-secondary)">Bottom text...</div>
+            </div>
+            <button class="mm-btn">Generate Meme</button>
+          </div>
+        </div>
+
+        <div class="mm-floating-emoji" style="top: -20px; right: -20px; animation-delay: 0s;">🔥</div>
+        <div class="mm-floating-emoji" style="bottom: 40px; left: -30px; transform: scale(1.2); animation-delay: 1.5s;">💎</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrapper section-padding animate-in" style="animation-delay:0.55s" id="memes">
+    <div class="meme-section-header">
+      <div class="ms-info">
+        <div class="ms-badge"><span class="pulse-dot"></span> Trending Now</div>
+        <h2 class="section-title" style="text-align: left; margin-bottom: 10px;">Community <span>Memes</span></h2>
+        <p>The freshest, most unhinged content straight from the trenches. Generated by the community, for the community.</p>
+      </div>
+      <div class="ms-actions">
+        <a href="meme-maker.html" class="btn-primary">Create Meme</a>
+        <a href="memes.html" class="btn-secondary">View Full Gallery →</a>
+      </div>
+    </div>
+
+    <div class="meme-bento">
+      <div class="bento-item">
+        <img src="memes/monigga-art-1.jpg" alt="Meme Art">
+        <div class="bento-overlay">
+          <span><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg></span>
+        </div>
+      </div>
+      <div class="bento-item">
+        <img src="memes/monigga-art-17.jpg" alt="Meme Art">
+        <div class="bento-overlay">
+          <span><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg></span>
+        </div>
+      </div>
+      <div class="bento-item">
+        <img src="memes/monigga-art-18.jpg" alt="Meme Art">
+        <div class="bento-overlay">
+          <span><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg></span>
+        </div>
+      </div>
+      <div class="bento-item">
+        <img src="memes/monigga-art-19.jpg" alt="Meme Art">
+        <div class="bento-overlay">
+          <span><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="trade" class="wrapper section-padding animate-in" style="animation-delay:0.6s">
+    <h2 class="section-title">Live Chart & <span>Trading</span></h2>
+    <div class="trade-container">
+      <div class="trade-links-panel">
+        <h3>Secure your Bag.</h3>
+        <p>Trade $MONIGGA instantly with deep liquidity on Monad's premier decentralized exchanges.</p>
+
+        <a href="https://nad.fun/tokens/0x73b62FF5CFea3Fb857DBE84a57f1631630247777" target="_blank" class="trade-btn btn-nad">
+          Buy on Nad.fun
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        </a>
+        <a href="https://www.kuru.io/token/0x73b62FF5CFea3Fb857DBE84a57f1631630247777" target="_blank" class="trade-btn btn-kuru">
+          Buy on Kuru
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        </a>
+        <a href="https://dexscreener.com/monad/0x1201512d6082a4c587628491c7b72b463bcbc1d6" target="_blank" class="trade-btn btn-dex">
+          View DEXScreener
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+        </a>
+      </div>
+
+      <div class="chart-panel">
+        <iframe src="https://dexscreener.com/monad/0x1201512d6082a4c587628491c7b72b463bcbc1d6?embed=1&theme=dark&trades=0&info=0"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrapper section-padding animate-in" style="animation-delay:0.7s" id="faq">
+    <h2 class="section-title">Frequently Asked <span>Questions</span></h2>
+    <div class="faq-container">
+      <details>
+        <summary>What blockchain is $MONIGGA on?</summary>
+        <div class="faq-content">
+          $MONIGGA is built entirely on the <strong>Monad</strong> network. Monad is a high-performance EVM-compatible Layer 1 blockchain designed to offer massive throughput and incredibly fast transaction speeds, making it the perfect home for a fast-paced memecoin ecosystem.
+        </div>
+      </details>
+      <details>
+        <summary>How can I buy the token?</summary>
+        <div class="faq-content">
+          You can purchase $MONIGGA through decentralized exchanges supporting the Monad network. We recommend using <strong>Nad.fun</strong> or <strong>Kuru</strong>. Make sure you have a compatible Web3 wallet funded with Monad's native gas token to cover transaction fees.
+        </div>
+      </details>
+      <details>
+        <summary>Is the contract safe?</summary>
+        <div class="faq-content">
+          Monigga launched on (platform), therefore the <strong>liquidity is locked</strong>, and the contract is <strong>100% safe</strong>.
+        </div>
+      </details>
+      <details>
+        <summary>Where is Monigga's dad?</summary>
+        <div class="faq-content">
+          Monigga's dad went to get the milk before Monigga was born. He got the milk, but couldn'tread the directions to get home. Legend says he is fucking other fat bitches.
+        </div>
+      </details>
+    </div>
+  </section>
+
+
+  <footer class="footer">
+    <span>the blackest nigga breathing on monad</span> •
+    <a href="https://twitter.com/moniggax" target="_blank">Twitter</a> •
+    <a href="https://t.me/moniggas" target="_blank">Telegram</a>
+  </footer>
+
+  <div class="modal-overlay" id="imgLightbox">
+    <button class="modal-close" id="imgClose">×</button>
+    <img src="" id="lightboxImage" style="max-width: 90%; max-height: 85vh; border-radius: 16px; box-shadow: 0 25px 60px rgba(0,0,0,0.6); transform: scale(0.9); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); object-fit: contain;">
+  </div>
+
+  <div class="toast" id="toast">Copied to clipboard!</div>
+
+  <div class="music-player animate-in" style="animation-delay: 1s;">
+    <audio id="bgMusic" loop>
+      <source src="audio/monigga.mp3" type="audio/mpeg">
+    </audio>
+
+    <button class="player-btn" id="playBtn" aria-label="Play/Pause">
+      <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M8 5v14l11-7z"/></svg>
+      <svg id="pauseIcon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="display:none;"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+    </button>
+
+    <div class="volume-control">
+      <span class="volume-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+      </span>
+      <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.01" value="0.3">
+    </div>
+  </div>
+
+  <script>
+    // --- Mobile Menu Toggle ---
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileLinks = document.querySelectorAll('.mobile-link');
+
+    mobileMenuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('active');
+    });
+
+    mobileLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        mobileMenu.classList.remove('active');
+      });
+    });
+
+    // --- Typewriter Effect ---
+    const text = "blackest nigga breathing";
+    const subtitleEl = document.getElementById('subtitle');
+    const cursor = document.querySelector('.typewriter-cursor');
+    let i = 0;
+    function typeWriter() {
+      if (i < text.length) {
+        subtitleEl.insertBefore(document.createTextNode(text.charAt(i)), cursor);
+        i++;
+        setTimeout(typeWriter, 60);
+      } else {
+        setTimeout(() => cursor.style.opacity = '0', 2000);
+      }
+    }
+    setTimeout(typeWriter, 800);
+
+    // --- Ticker Logic ---
+    function formatMoney(num) {
+      if (num >= 1000000) return '$' + (num / 1000000).toFixed(2) + 'M';
+      if (num >= 1000) return '$' + (num / 1000).toFixed(1) + 'K';
+      if (num < 0.01) return '$' + num.toFixed(6);
+      return '$' + num.toFixed(2);
+    }
+    async function fetchDexData() {
+      try {
+        const res = await fetch('https://api.dexscreener.com/latest/dex/pairs/monad/0x1201512d6082a4c587628491c7b72b463bcbc1d6');
+        const data = await res.json();
+        if(data.pair) {
+          const p = data.pair;
+          document.getElementById('tokenPrice').textContent = formatMoney(parseFloat(p.priceUsd));
+          const change = parseFloat(p.priceChange.h24);
+          const changeEl = document.getElementById('priceChange');
+          changeEl.textContent = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
+          changeEl.className = 'change-badge ' + (change >= 0 ? 'positive' : 'negative');
+          document.getElementById('marketCap').textContent = p.marketCap ? formatMoney(p.marketCap) : '--';
+          document.getElementById('tickerVolume').textContent = p.volume.h24 ? formatMoney(p.volume.h24) : '--';
+          document.getElementById('tickerLiquidity').textContent = p.liquidity && p.liquidity.usd ? formatMoney(p.liquidity.usd) : '--';
+          document.getElementById('tickerFdv').textContent = p.fdv ? formatMoney(p.fdv) : '--';
+          const now = new Date();
+          document.getElementById('tickerUpdated').textContent = `Live • ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+        }
+      } catch (e) {
+        document.getElementById('tickerUpdated').textContent = "Data unavailable";
+      }
+    }
+    fetchDexData();
+    setInterval(fetchDexData, 30000);
+
+    // --- Copy Contract ---
+    function copyContract() {
+      navigator.clipboard.writeText('0x73b62FF5CFea3Fb857DBE84a57f1631630247777');
+      const toast = document.getElementById('toast');
+      toast.classList.add('visible');
+      setTimeout(() => toast.classList.remove('visible'), 2000);
+    }
+
+    // --- Bento Lightbox Logic ---
+    const bentoItems = document.querySelectorAll('.bento-item img');
+    const imgLightbox = document.getElementById('imgLightbox');
+    const lightboxImage = document.getElementById('lightboxImage');
+    const imgClose = document.getElementById('imgClose');
+
+    bentoItems.forEach(img => {
+      img.parentElement.addEventListener('click', () => {
+        lightboxImage.src = img.src;
+        imgLightbox.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => lightboxImage.style.transform = 'scale(1)', 50);
+      });
+    });
+
+    imgClose.onclick = () => {
+      lightboxImage.style.transform = 'scale(0.9)';
+      imgLightbox.classList.remove('active');
+      document.body.style.overflow = '';
+    };
+
+    imgLightbox.onclick = (e) => {
+      if(e.target === imgLightbox) imgClose.onclick();
+    };
+
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'Escape' && imgLightbox.classList.contains('active')) {
+        imgClose.onclick();
+      }
+    });
+
+    // --- Theme Toggle ---
+    const themeBtn = document.getElementById('themeToggle');
+    themeBtn.onclick = () => {
+      document.documentElement.classList.add('theme-transition');
+      const current = document.documentElement.getAttribute('data-theme');
+      const newTheme = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+
+      const iframe = document.querySelector('.chart-panel iframe');
+      if (iframe) {
+        iframe.src = iframe.src.replace(`theme=${current}`, `theme=${newTheme}`);
+      }
+      setTimeout(() => document.documentElement.classList.remove('theme-transition'), 300);
+    };
+
+    // --- Music Player Logic ---
+    const bgMusic = document.getElementById('bgMusic');
+    const playBtn = document.getElementById('playBtn');
+    const playIcon = document.getElementById('playIcon');
+    const pauseIcon = document.getElementById('pauseIcon');
+    const discIcon = document.getElementById('discIcon');
+    const volumeSlider = document.getElementById('volumeSlider');
+
+    // Initialize Volume
+    bgMusic.volume = volumeSlider.value;
+
+    playBtn.addEventListener('click', () => {
+      if (bgMusic.paused) {
+        bgMusic.play().then(() => {
+          playIcon.style.display = 'none';
+          pauseIcon.style.display = 'block';
+          discIcon.classList.add('playing');
+        }).catch(e => console.log("Audio play failed:", e));
+      } else {
+        bgMusic.pause();
+        playIcon.style.display = 'block';
+        pauseIcon.style.display = 'none';
+        discIcon.classList.remove('playing');
+      }
+    });
+
+    volumeSlider.addEventListener('input', (e) => {
+      bgMusic.volume = e.target.value;
+    });
+
+    // --- Particles Background ---
+    const canvas = document.getElementById('particleGrid');
+    const ctx = canvas.getContext('2d');
+    let width, height, particles = [];
+    function resize() {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
+      particles = Array.from({length: 40}, () => ({
+        x: Math.random() * width, y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5,
+        size: Math.random() * 2 + 1
+      }));
+    }
+    window.addEventListener('resize', resize);
+    resize();
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = 'rgba(155, 95, 255, 0.4)';
+      particles.forEach(p => {
+        p.x += p.vx; p.y += p.vy;
+        if(p.x < 0 || p.x > width) p.vx *= -1;
+        if(p.y < 0 || p.y > height) p.vy *= -1;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
+      });
+      requestAnimationFrame(draw);
+    }
+    draw();
+  </script>
+</body>
+</html>
